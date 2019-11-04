@@ -20,7 +20,7 @@ def create_dataset_from_scenes(args) -> None:
             if frame_groups is None:
                 break
             for frame_group in frame_groups:
-                frame_group_paths = save_frame_group(frame_group, frame_group_idx, args.output_dir, file)
+                frame_group_paths = save_frame_group(frame_group, frame_group_idx, args.output_dir, scene)
                 frame_group_idx += 1
                 dataframe = add_frame_group_paths(dataframe, frame_group_paths)
         cap.release()
@@ -46,8 +46,8 @@ def get_frame_groups(video_capture: cv2.VideoCapture,
 
 
 def save_frame_group(frames: List[np.ndarray], frame_group_idx: int, output_dir: str, input_file: str) -> List[str]:
-    filename = os.path.basename(input_file)
-    path_to_frame = {f'{filename}-{frame_group_idx}-{idx}.png': frame
+    filename = os.path.splitext(os.path.split(input_file)[1])[0]
+    path_to_frame = {f'{filename}__group_{frame_group_idx}__frame_{idx}.png': frame
                      for idx, frame in enumerate(frames)}
     paths = []
     for path, frame in path_to_frame.items():
