@@ -13,12 +13,14 @@ def cut_videos_to_scenes(args) -> None:
         scene_tags = load_scene_tags(scene_tags_path)
         cut_to_scenes(video_path, args.output_dir, scene_tags)
 
+
 def get_paths(videos_dir: str, scenes_dir: str) -> List[Tuple[str, str]]:
     videos_paths = sorted(glob(os.path.join(os.getcwd(), videos_dir, '*.*')))
     scenes_paths = sorted(glob(os.path.join(os.getcwd(), scenes_dir, '*.*')))
     if not are_paths_valid(videos_paths, scenes_paths):
         raise ValueError('Video files\' names or number do not match those of scene tags files.')
     return list(zip(videos_paths, scenes_paths))
+
 
 def are_paths_valid(videos_paths: List[str], scenes_paths: List[str]) -> bool:
     if len(videos_paths) != len(scenes_paths):
@@ -30,13 +32,17 @@ def are_paths_valid(videos_paths: List[str], scenes_paths: List[str]) -> bool:
             return False
     return True
 
+
 def load_scene_tags(scene_tags_path: str) -> List[Tuple[int, int]]:
     with open(scene_tags_path) as fp:
         lines = fp.readlines()
     scene_tags = [tuple([int(tag) for tag in line.split(' ')]) for line in lines]
     return cast(List[Tuple[int, int]], scene_tags)
 
+
 def cut_to_scenes(video_path: str, output_dir: str, scene_tags: List[Tuple[int, int]]) -> None:
+    if not os.path.exists(output_dir):
+        os.mkdir(output_dir)
     video = VideoFileClip(video_path, verbose=False)
     for idx, (start, end) in enumerate(scene_tags):
         scene = video.subclip(start / video.fps, end / video.fps)
@@ -53,7 +59,7 @@ if __name__ == '__main__':
     )
     parser.add_argument(
         '--input-scenes-dir', '-isd', type=str, required=True,
-		help='Directory with input text files with pairs of indices of first and last frame of each scene'
+        help='Directory with input text files with pairs of indices of first and last frame of each scene'
     )
     parser.add_argument(
         '--output-dir', '-od', type=str, required=True, help='Directory where to save cut scenes'
