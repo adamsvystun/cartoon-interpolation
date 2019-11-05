@@ -65,7 +65,7 @@ def add_frame_group_paths(dataframe: pd.DataFrame, frame_group_paths: List[str])
 
 def save_dataframe(dataframe: pd.DataFrame, output_dir: str, dataset_file_name: str) -> None:
     output_path = os.path.join(output_dir, dataset_file_name)
-    dataframe.to_csv(output_path)
+    dataframe.to_csv(output_path, index=False)
 
 
 if __name__ == '__main__':
