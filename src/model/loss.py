@@ -26,7 +26,7 @@ def interpolation_loss(predicted_frame, true_frame, beta, gamma):
 
 
 def cycle_consistency_loss(predicted_frames, true_frames, alphas, beta, gamma):
-    loss = torch.zeros(predicted_frames.size(0)).cuda()
+    loss = torch.zeros(predicted_frames[0].size(0)).cuda()
     for alpha, predicted_frame, true_frame in zip(alphas, predicted_frames, true_frames):
         loss += alpha * interpolation_loss(predicted_frame, true_frame, beta, gamma)
     return loss

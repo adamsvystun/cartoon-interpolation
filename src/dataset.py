@@ -5,7 +5,20 @@ from PIL import Image
 from skimage import io
 from torch.utils import data
 import torch
+import numpy as np
 import pandas as pd
+
+
+class Tile(object):
+
+    def __init__(self, reps):
+        self.reps = reps
+
+    def __call__(self, sample):
+        sample = np.asarray(sample)
+        sample = np.expand_dims(sample, axis=2)
+        sample  = np.tile(sample, self.reps)
+        return Image.fromarray(sample)
 
 
 class DD40Dataset(data.Dataset):
@@ -15,6 +28,7 @@ class DD40Dataset(data.Dataset):
         self.directory = directory
         self.transform = transforms.Compose([
             transforms.Grayscale(),
+            Tile(reps=(1, 1, 3)),
             transforms.Resize(size=(256, 256)),
             transforms.ToTensor(),
         ])

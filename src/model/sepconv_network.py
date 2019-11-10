@@ -56,7 +56,7 @@ class KernelEstimation(torch.nn.Module):
                 torch.nn.Conv2d(in_channels=ks, out_channels=ks, kernel_size=3, stride=1, padding=1)
             )
 
-        self.moduleConv1 = Basic(2, 32)
+        self.moduleConv1 = Basic(6, 32)
         self.modulePool1 = torch.nn.AvgPool2d(kernel_size=2, stride=2)
 
         self.moduleConv2 = Basic(32, 64)

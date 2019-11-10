@@ -39,16 +39,12 @@ class Trainer(BaseTrainer):
         self.model.train()
         self.train_metrics.reset()
         for batch_idx, batch_sample in enumerate(self.data_loader):
-            print('self.device', self.device)
             batch_sample = {k: v.to(self.device) for k,v in batch_sample.items()}
 
             self.optimizer.zero_grad()
             output = self.model(batch_sample['frame0'], batch_sample['frame2'], batch_sample['frame4'])
             target = (batch_sample['frame1'], batch_sample['frame2'], batch_sample['frame3'])
-            print('output', output)
-            print('target', target)
-            loss_args = self.config['loss']['args']
-            loss = self.criterion(output, target, loss_args['alphas'], loss_args['beta'], loss_args['gamma'])
+            loss = self.criterion(output, target, **self.config['loss']['args'])
             loss.backward()
             self.optimizer.step()
 

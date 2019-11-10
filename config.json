@@ -30,7 +30,7 @@
     "loss": {
         "type": "cycle_consistency_loss",
         "args": {
-            "alphas": [1, 1, 3],
+            "alphas": [1, 0.1, 1],
             "beta": 1,
             "gamma": 1
         }
