@@ -39,11 +39,16 @@ class Trainer(BaseTrainer):
         self.model.train()
         self.train_metrics.reset()
         for batch_idx, batch_sample in enumerate(self.data_loader):
-            data, target = data.to(self.device), target.to(self.device)
+            print('self.device', self.device)
+            batch_sample = {k: v.to(self.device) for k,v in batch_sample.items()}
 
             self.optimizer.zero_grad()
-            output = self.model(data)
-            loss = self.criterion(output, target, self.config.alphas, self.config.beta, self.config.gamma)
+            output = self.model(batch_sample['frame0'], batch_sample['frame2'], batch_sample['frame4'])
+            target = (batch_sample['frame1'], batch_sample['frame2'], batch_sample['frame3'])
+            print('output', output)
+            print('target', target)
+            loss_args = self.config['loss']['args']
+            loss = self.criterion(output, target, loss_args['alphas'], loss_args['beta'], loss_args['gamma'])
             loss.backward()
             self.optimizer.step()
 
@@ -57,7 +62,7 @@ class Trainer(BaseTrainer):
                     epoch,
                     self._progress(batch_idx),
                     loss.item()))
-                self.writer.add_image('input', make_grid(data.cpu(), nrow=8, normalize=True))
+                # self.writer.add_image('input', make_grid(data.cpu(), nrow=8, normalize=True))
 
             if batch_idx == self.len_epoch:
                 break
