@@ -1,25 +1,36 @@
-from os import listdir
-from os.path import join, isdir
+import os
 
-import numpy as np
+from torchvision import transforms
+from skimage import io
+import torch
 from torch.utils import data
+import pandas as pd
 
 
 class DD40Dataset(data.Dataset):
 
-    def __init__(self, directory, train, transform):
-        self.transform = transform
+    def __init__(self, directory, dataset_file, train):
         self.train = train
-        self.triplet_list = np.array([(directory + '/' + f) for f in listdir(directory) if isdir(join(directory, f))])
-        self.file_len = len(self.triplet_list)
+        self.directory = directory
+        self.transform = transforms.Compose([
+            transforms.ToTensor(),
+            transforms.Grayscale()
+        ])
+        self.dataset_descriptor = pd.read_csv(os.path.join(directory, dataset_file))
 
-    def __getitem__(self, index):
-        # TODO: Implement getitem
-        frame0 = None
-        frame1 = None
-        frame2 = None
+    def __getitem__(self, idx):
+        if torch.is_tensor(idx):
+            idx = idx.tolist()
 
-        return frame0, frame1, frame2
+        sample = {}
+        for i in range(5):
+            frame_name = 'frame' + str(i)
+            frame_path = os.path.join(self.directory, self.dataset_descriptor.iloc[idx][frame_name])
+            frame = io.imread(frame_path)
+            sample[frame_name] = frame
+
+        sample = self.transform(sample)
+        return sample
 
     def __len__(self):
-        return self.file_len
+        return len(self.dataset_descriptor.index)
