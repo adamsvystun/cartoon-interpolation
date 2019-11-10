@@ -6,11 +6,11 @@ https://github.com/HyeongminLEE/pytorch-sepconv
 import math
 import sys
 
-import sepconv
-import torch
-import torch.optim as optim
+from src.model import sepconv
 from torch.autograd import Variable
 from torch.nn import functional as F
+import torch
+import torch.optim as optim
 
 
 def to_variable(x):
@@ -56,7 +56,7 @@ class KernelEstimation(torch.nn.Module):
                 torch.nn.Conv2d(in_channels=ks, out_channels=ks, kernel_size=3, stride=1, padding=1)
             )
 
-        self.moduleConv1 = Basic(6, 32)
+        self.moduleConv1 = Basic(2, 32)
         self.modulePool1 = torch.nn.AvgPool2d(kernel_size=2, stride=2)
 
         self.moduleConv2 = Basic(32, 64)
@@ -177,5 +177,5 @@ class SepConvNet(torch.nn.Module):
             frame1 = frame1[:, :, 0:h0, :]
         if w_padded:
             frame1 = frame1[:, :, :, 0:w0]
-
+            
         return frame1

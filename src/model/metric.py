@@ -25,14 +25,16 @@ def top_k_acc(output, target, k=3):
     return correct / len(target)
 
 
-def psnr(output, target):
-    with torch.no_grad():
-        original = target.cpu().detach().numpy()
-        compared = output.cpu().detach().numpy()
-        mse = np.mean(np.square(original - compared))
-        value = np.clip(
-            np.multiply(np.log10(255. * 255. / mse[mse > 0.]), 10.), 0., 99.99)[0]
-    return value
+def psnr(outputs, targets):
+    value = 0
+    for output, target in zip(outputs, targets):
+        with torch.no_grad():
+            original = target.cpu().detach().numpy()
+            compared = output.cpu().detach().numpy()
+            mse = np.mean(np.square(original - compared))
+            value += np.clip(
+                np.multiply(np.log10(255. * 255. / mse[mse > 0.]), 10.), 0., 99.99)[0]
+    return value / len(outputs)
 
 
 def _gaussian(window_size, sigma):
@@ -70,12 +72,16 @@ def _ssim(img1, img2, window, window_size, channel, size_average=True):
         return ssim_map.mean(1).mean(1).mean(1)
 
 
-def ssim(img1, img2, window_size=11, size_average=True):
-    (_, channel, _, _) = img1.size()
+def ssim(outputs, targets, window_size=11, size_average=True):
+    (_, channel, _, _) = outputs[0].size()
     window = _create_window(window_size, channel)
 
-    if img1.is_cuda:
-        window = window.cuda(img1.get_device())
-    window = window.type_as(img1)
+    if outputs[0].is_cuda:
+        window = window.cuda(outputs[0].get_device())
+    window = window.type_as(outputs[0])
 
-    return _ssim(img1, img2, window, window_size, channel, size_average)
+    ssim = 0
+    for output, target in zip(outputs, targets):
+        ssim += _ssim(output, target, window, window_size, channel, size_average)
+
+    return ssim / len(outputs)
