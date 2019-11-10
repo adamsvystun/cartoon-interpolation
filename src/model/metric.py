@@ -1,4 +1,5 @@
 import torch
+import numpy as np
 
 
 def accuracy(output, target):
@@ -18,3 +19,17 @@ def top_k_acc(output, target, k=3):
         for i in range(k):
             correct += torch.sum(pred[:, i] == target).item()
     return correct / len(target)
+
+
+def psnr(output, target):
+    with torch.no_grad():
+        original = target.cpu().detach().numpy()
+        compared = output.cpu().detach().numpy()
+        mse = np.mean(np.square(original - compared))
+        value = np.clip(
+            np.multiply(np.log10(255. * 255. / mse[mse > 0.]), 10.), 0., 99.99)[0]
+    return value
+
+
+def ssim():
+    pass

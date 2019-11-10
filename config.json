@@ -24,9 +24,9 @@
             "amsgrad": true
         }
     },
-    "loss": "nll_loss",
+    "loss": "cycle_consistency_loss",
     "metrics": [
-        "accuracy", "top_k_acc"
+        "ssim", "psnr"
     ],
     "lr_scheduler": {
         "type": "StepLR",
