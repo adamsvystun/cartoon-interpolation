@@ -3,7 +3,7 @@ import torch
 from torchvision.utils import make_grid
 
 from src.trainer.base import BaseTrainer
-from src.trainer.utils import inf_loop, MetricTracker
+from src.utils.utils import inf_loop, MetricTracker
 
 
 class Trainer(BaseTrainer):
