@@ -9,3 +9,4 @@ Pillow
 scikit-image
 tensorboard>=1.14.0
 tqdm
+torchvision
