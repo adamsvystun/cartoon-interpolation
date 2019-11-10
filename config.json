@@ -15,7 +15,7 @@
             "dataset_csv": "dataset.csv",
             "batch_size": 1,
             "shuffle": true,
-            "validation_split": 0.0,
+            "validation_split": 0.25,
             "num_workers": 2
         }
     },
