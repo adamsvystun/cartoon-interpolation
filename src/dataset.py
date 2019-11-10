@@ -3,15 +3,13 @@ from os.path import join, isdir
 
 import numpy as np
 from torch.utils import data
-from torchvision import transforms
 
 
-class CartoonDataset(data.Dataset):
+class DD40Dataset(data.Dataset):
 
-    def __init__(self, directory):
-        self.transform = transforms.Compose([
-            transforms.ToTensor()
-        ])
+    def __init__(self, directory, train, transform):
+        self.transform = transform
+        self.train = train
         self.triplet_list = np.array([(directory + '/' + f) for f in listdir(directory) if isdir(join(directory, f))])
         self.file_len = len(self.triplet_list)
 

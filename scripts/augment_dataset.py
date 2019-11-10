@@ -13,7 +13,7 @@ import numpy as np
 import pandas as pd
 import tqdm
 
-from src.utils import batch
+from src.utils.utils import batch
 
 
 TripletPaths = List[List[str]]

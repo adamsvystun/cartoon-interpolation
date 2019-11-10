@@ -5,6 +5,12 @@ from itertools import repeat
 from collections import OrderedDict
 
 
+def batch(iterable, n=1):
+    length = len(iterable)
+    for ndx in range(0, length, n):
+        yield iterable[ndx:min(ndx + n, length)]
+
+
 def ensure_dir(dirname):
     dirname = Path(dirname)
     if not dirname.is_dir():
