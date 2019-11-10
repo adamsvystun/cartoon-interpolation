@@ -1,6 +1,9 @@
 import torch
 
 from src.model.sepconv_network import SepConvNet
+from src.model.ccnn.model import CCNN
+
+__all__ = ['CCNN', 'CycleSepConv']
 
 
 class CycleSepConv(torch.nn.Module):

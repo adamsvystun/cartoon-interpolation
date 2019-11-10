@@ -1,3 +1,4 @@
+torch
 Augmentor
 cupy
 moviepy==1.0.0
