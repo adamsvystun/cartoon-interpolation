@@ -23,8 +23,9 @@ class Tile(object):
 
 class DD40Dataset(data.Dataset):
 
-    def __init__(self, directory, dataset_file, train):
+    def __init__(self, directory, dataset_file, train, return_paths=False):
         self.train = train
+        self.return_paths = return_paths
         self.directory = directory
         self.transform = transforms.Compose([
             transforms.Grayscale(),
@@ -44,6 +45,8 @@ class DD40Dataset(data.Dataset):
             frame_path = os.path.join(self.directory, self.dataset_descriptor.iloc[idx][frame_name])
             frame = Image.open(frame_path)
             sample[frame_name] = self.transform(frame)
+            if self.return_paths:
+                sample[frame_name + '_path'] = self.dataset_descriptor.iloc[idx][frame_name]
             
         return sample
 
