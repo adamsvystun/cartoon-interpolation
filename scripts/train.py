@@ -1,112 +1,68 @@
-"""
-Modified from:
-https://github.com/HyeongminLEE/pytorch-sepconv
-"""
-
 import argparse
-import os
-
+import collections
 import torch
-from torch.autograd import Variable
-from torch.utils.data import DataLoader
-from torchvision import transforms
+import numpy as np
 
-from src.sepconv import SepConvNet
-from src.dataset import CartoonDataset
-
-transform = transforms.Compose([transforms.ToTensor()])
-
-
-def to_variable(x):
-    if torch.cuda.is_available():
-        x = x.cuda()
-    return Variable(x)
+import src.data_loader.data_loaders as module_data
+import src.model.loss as module_loss
+import src.model.metric as module_metric
+import src.model.model as module_arch
+from src.utils.parse_config import ConfigParser
+from src.trainer.trainer import Trainer
 
 
-def main(options):
-    db_dir = options.train
-
-    if not os.path.exists(options.out_dir):
-        os.makedirs(options.out_dir)
-    result_dir = options.out_dir + '/result'
-    ckpt_dir = options.out_dir + '/checkpoint'
-
-    if not os.path.exists(result_dir):
-        os.makedirs(result_dir)
-    if not os.path.exists(ckpt_dir):
-        os.makedirs(ckpt_dir)
-
-    logfile = open(options.out_dir + '/log.txt', 'w')
-    logfile.write('batch_size: ' + str(options.batch_size) + '\n')
-
-    total_epoch = options.epochs
-    batch_size = options.batch_size
-
-    dataset = CartoonDataset(db_dir)
-    train_loader = DataLoader(dataset=dataset, batch_size=batch_size, shuffle=True, num_workers=0)
-
-    # TestDB = Middlebury_other(options.test_input, options.gt)
-    # test_output_dir = options.out_dir + '/result'
-
-    if options.load_model is not None:
-        checkpoint = torch.load(options.load_model)
-        kernel_size = checkpoint['kernel_size']
-        model = SepConvNet(kernel_size=kernel_size)
-        state_dict = checkpoint['state_dict']
-        model.load_state_dict(state_dict)
-        model.epoch = checkpoint['epoch']
-    else:
-        kernel_size = options.kernel
-        model = SepConvNet(kernel_size=kernel_size)
-
-    logfile.write('kernel_size: ' + str(kernel_size) + '\n')
-
-    if torch.cuda.is_available():
-        model = model.cuda()
-
-    max_step = train_loader.__len__()
-
-    # model.eval()
-    # TestDB.Test(model, test_output_dir, logfile, str(model.epoch.item()).zfill(3) + '.png')
-
-    while True:
-        if model.epoch.item() == total_epoch:
-            break
-        model.train()
-        for batch_idx, (frame0, frame1, frame2) in enumerate(train_loader):
-            frame0 = to_variable(frame0)
-            frame1 = to_variable(frame1)
-            frame2 = to_variable(frame2)
-            loss = model.train_model(frame0, frame2, frame1)
-            if batch_idx % 100 == 0:
-                print('{:<13s}{:<14s}{:<6s}{:<16s}{:<12s}{:<20.16f}'.format(
-                    'Train Epoch: ', '[' + str(model.epoch.item()) + '/' + str(total_epoch) + ']',
-                    'Step: ', '[' + str(batch_idx) + '/' + str(max_step) + ']',
-                    'train loss: ', loss.item()
-                ))
-        model.increase_epoch()
-        if model.epoch.item() % 1 == 0:
-            torch.save({'epoch': model.epoch, 'state_dict': model.state_dict(), 'kernel_size': kernel_size},
-                       ckpt_dir + '/model_epoch' + str(model.epoch.item()).zfill(3) + '.pth')
-            # model.eval()
-            # TestDB.Test(model, test_output_dir, logfile, str(model.epoch.item()).zfill(3) + '.png')
-            logfile.write('\n')
-
-    logfile.close()
+# fix random seeds for reproducibility
+SEED = 123
+torch.manual_seed(SEED)
+torch.backends.cudnn.deterministic = True
+torch.backends.cudnn.benchmark = False
+np.random.seed(SEED)
 
 
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description='SepConv Pytorch')
+def main(config):
+    logger = config.get_logger('train')
 
-    # parameters
-    parser.add_argument('--train', type=str, default='./data/dataset/')
-    parser.add_argument('--kernel', type=int, default=51)
-    parser.add_argument('--out_dir', type=str, default='./logs/')
-    parser.add_argument('--epochs', type=int, default=10)
-    parser.add_argument('--batch_size', type=int, default=4)
-    parser.add_argument('--load_model', type=str, default=None)
-    # parser.add_argument('--test_input', type=str, default='./data/dataset/input')
-    parser.add_argument('--gt', type=str, default='./data/dataset/gt')
+    # setup data_loader instances
+    data_loader = config.init_obj('data_loader', module_data)
+    valid_data_loader = data_loader.split_validation()
 
-    args = parser.parse_args()
-    main(args)
+    # build model architecture, then print to console
+    model = config.init_obj('arch', module_arch)
+    logger.info(model)
+
+    # get function handles of loss and metrics
+    criterion = getattr(module_loss, config['loss'])
+    metrics = [getattr(module_metric, met) for met in config['metrics']]
+
+    # build optimizer, learning rate scheduler. delete every lines containing lr_scheduler for disabling scheduler
+    trainable_params = filter(lambda p: p.requires_grad, model.parameters())
+    optimizer = config.init_obj('optimizer', torch.optim, trainable_params)
+
+    lr_scheduler = config.init_obj('lr_scheduler', torch.optim.lr_scheduler, optimizer)
+
+    trainer = Trainer(model, criterion, metrics, optimizer,
+                      config=config,
+                      data_loader=data_loader,
+                      valid_data_loader=valid_data_loader,
+                      lr_scheduler=lr_scheduler)
+
+    trainer.train()
+
+
+if __name__ == '__main__':
+    args = argparse.ArgumentParser(description='Cartoon Interpolation Training')
+    args.add_argument('-c', '--config', default=None, type=str,
+                      help='config file path (default: None)')
+    args.add_argument('-r', '--resume', default=None, type=str,
+                      help='path to latest checkpoint (default: None)')
+    args.add_argument('-d', '--device', default=None, type=str,
+                      help='indices of GPUs to enable (default: all)')
+
+    # custom cli options to modify configuration from default values given in json file.
+    CustomArgs = collections.namedtuple('CustomArgs', 'flags type target')
+    options = [
+        CustomArgs(['--lr', '--learning_rate'], type=float, target='optimizer;args;lr'),
+        CustomArgs(['--bs', '--batch_size'], type=int, target='data_loader;args;batch_size')
+    ]
+    config = ConfigParser.from_args(args, options)
+    main(config)
