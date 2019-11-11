@@ -62,18 +62,14 @@ def main(config):
             batch_size = batch_sample['frame0'].shape[0]
 
             frames1 = output[0].cpu().detach().numpy()
-            frames2 = output[1].cpu().detach().numpy()
             frames3 = output[2].cpu().detach().numpy()
 
             for i in range(batch_size):
                 frame1 = frames1[i].astype(np.float32)
-                frame2 = frames2[i].astype(np.float32)
                 frame3 = frames3[i].astype(np.float32)
                 frame1_path = batch_sample['frame1_path'][i]
-                frame2_path = batch_sample['frame1_path'][i]
                 frame3_path = batch_sample['frame1_path'][i]
                 Image.fromarray(frame1).save(os.path.join(save_folder, frame1_path))
-                Image.fromarray(frame2).save(os.path.join(save_folder, frame2_path))
                 Image.fromarray(frame3).save(os.path.join(save_folder, frame3_path))
 
                 # computing loss, metrics on test set
