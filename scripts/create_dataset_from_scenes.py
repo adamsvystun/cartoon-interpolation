@@ -47,14 +47,14 @@ def get_frame_groups(video_capture: cv2.VideoCapture,
 
 def save_frame_group(frames: List[np.ndarray], frame_group_idx: int, output_dir: str, input_file: str) -> List[str]:
     filename = os.path.splitext(os.path.split(input_file)[1])[0]
-    path_to_frame = {f'{filename}__group_{frame_group_idx}__frame_{idx}.png': frame
+    filename_to_frame = {f'{filename}__group_{frame_group_idx}__frame_{idx}.png': frame
                      for idx, frame in enumerate(frames)}
-    paths = []
-    for path, frame in path_to_frame.items():
-        path = os.path.join(output_dir, path)
+    filenames = []
+    for filename, frame in filename_to_frame.items():
+        path = os.path.join(output_dir, filename)
         cv2.imwrite(path, frame)
-        paths.append(path)
-    return paths
+        filenames.append(filename)
+    return filenames
 
 
 def add_frame_group_paths(dataframe: pd.DataFrame, frame_group_paths: List[str]) -> pd.DataFrame:

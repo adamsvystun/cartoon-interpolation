@@ -83,9 +83,10 @@ def save_images(output_dir: str, triplet_images: TripletImages) -> TripletPaths:
         triplet_id = uuid4()
         for j, image in enumerate(triplet):
             image = Image.fromarray(image)
-            path = os.path.join(output_dir, f'{triplet_id}_{i}_{j}.png')
+            filename = f'{triplet_id}_{i}_{j}.png'
+            path = os.path.join(output_dir, filename)
             image.save(path)
-            triplet_paths[i].append(path)
+            triplet_paths[i].append(filename)
     return triplet_paths
 
 
