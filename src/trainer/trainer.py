@@ -25,7 +25,7 @@ class Trainer(BaseTrainer):
         self.valid_data_loader = valid_data_loader
         self.do_validation = self.valid_data_loader is not None
         self.lr_scheduler = lr_scheduler
-        self.log_step = int(np.sqrt(data_loader.batch_size))
+        self.log_step = config['trainer']['log_step']
 
         self.train_metrics = MetricTracker('loss', *[m.__name__ for m in self.metric_ftns], writer=self.writer)
         self.valid_metrics = MetricTracker('loss', *[m.__name__ for m in self.metric_ftns], writer=self.writer)
@@ -42,7 +42,8 @@ class Trainer(BaseTrainer):
             batch_sample = {k: v.to(self.device) for k,v in batch_sample.items()}
 
             self.optimizer.zero_grad()
-            output = self.model(batch_sample['frame0'], batch_sample['frame2'], batch_sample['frame4'])
+            input = (batch_sample['frame0'], batch_sample['frame2'], batch_sample['frame4'])
+            output = self.model(*input)
             target = (batch_sample['frame1'], batch_sample['frame2'], batch_sample['frame3'])
             loss = self.criterion(output, target, **self.config['loss']['args'])
             loss.backward()
@@ -58,7 +59,7 @@ class Trainer(BaseTrainer):
                     epoch,
                     self._progress(batch_idx),
                     loss.item()))
-                # self.writer.add_image('input', make_grid(data.cpu(), nrow=8, normalize=True))
+                self._show_images(input, target, output)
 
             if batch_idx == self.len_epoch:
                 break
@@ -84,7 +85,8 @@ class Trainer(BaseTrainer):
             for batch_idx, batch_sample in enumerate(self.valid_data_loader):
                 batch_sample = {k: v.to(self.device) for k,v in batch_sample.items()}
 
-                output = self.model(batch_sample['frame0'], batch_sample['frame2'], batch_sample['frame4'])
+                input = (batch_sample['frame0'], batch_sample['frame2'], batch_sample['frame4'])
+                output = self.model(*input)
                 target = (batch_sample['frame1'], batch_sample['frame2'], batch_sample['frame3'])
                 loss = self.criterion(output, target, **self.config['loss']['args'])
 
@@ -92,7 +94,7 @@ class Trainer(BaseTrainer):
                 self.valid_metrics.update('loss', loss.item())
                 for met in self.metric_ftns:
                     self.valid_metrics.update(met.__name__, met(output, target))
-                # self.writer.add_image('input', make_grid(data.cpu(), nrow=8, normalize=True))
+                self._show_images(input, target, output)
 
         # add histogram of model parameters to the tensorboard
         for name, p in self.model.named_parameters():
@@ -108,3 +110,13 @@ class Trainer(BaseTrainer):
             current = batch_idx
             total = self.len_epoch
         return base.format(current, total, 100.0 * current / total)
+
+    def _show_images(self, input, target, output):
+        b, c, w, h = input[0].shape
+        for i in range(self.config['data_loader']['args']['batch_size']):
+            images = torch.cat([
+                torch.cat([input[0][i], input[1][i], input[2][i]], dim=0).view(3, c, w, h),
+                torch.cat([target[0][i], target[1][i], target[2][i]], dim=0).view(3, c, w, h),
+                torch.cat([output[0][i], output[1][i], output[2][i]], dim=0).view(3, c, w, h),
+            ], dim=0)
+            self.writer.add_image(f'example_{i}', make_grid(images.cpu(), nrow=3, normalize=True))
