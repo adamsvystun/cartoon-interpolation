@@ -10,7 +10,9 @@ import tqdm
 
 
 def create_dataset_from_scenes(args) -> None:
-    dataframe = create_dataframe(args)
+    if not os.path.exists(args.output_dir):
+        os.mkdir(args.output_dir)
+    dataset = create_dataset(args)
     scenes_path = os.path.join(os.getcwd(), args.input_dir, '*.*')
     for scene in tqdm.tqdm(glob.glob(scenes_path)):
         cap = cv2.VideoCapture(scene)
@@ -22,15 +24,15 @@ def create_dataset_from_scenes(args) -> None:
             for frame_group in frame_groups:
                 frame_group_paths = save_frame_group(frame_group, frame_group_idx, args.output_dir, scene)
                 frame_group_idx += 1
-                dataframe = add_frame_group_paths(dataframe, frame_group_paths)
+                dataset = add_frame_group_paths(dataset, frame_group_paths, scene)
         cap.release()
-    save_dataframe(dataframe, args.output_dir, args.dataset_file_name)
+    save_dataset(dataset, args.output_dir, args.dataset_file_name, args.split)
 
 
-def create_dataframe(args) -> pd.DataFrame:
+def create_dataset(args) -> pd.DataFrame:
     columns = [f'frame{int(idx)}' for idx in range(args.num_frames)]
-    dataframe = pd.DataFrame(columns=columns)
-    return dataframe
+    dataset = pd.DataFrame(columns=columns)
+    return dataset
 
 
 def get_frame_groups(video_capture: cv2.VideoCapture,
@@ -57,15 +59,30 @@ def save_frame_group(frames: List[np.ndarray], frame_group_idx: int, output_dir:
     return filenames
 
 
-def add_frame_group_paths(dataframe: pd.DataFrame, frame_group_paths: List[str]) -> pd.DataFrame:
+def add_frame_group_paths(dataset: pd.DataFrame, frame_group_paths: List[str], scene: str) -> pd.DataFrame:
     row = {f'frame{idx}': frame_group_path for idx, frame_group_path in enumerate(frame_group_paths)}
-    dataframe = dataframe.append(row, ignore_index=True)
+    row['scene'] = scene
+    dataframe = dataset.append(row, ignore_index=True)
     return dataframe
 
 
-def save_dataframe(dataframe: pd.DataFrame, output_dir: str, dataset_file_name: str) -> None:
-    output_path = os.path.join(output_dir, dataset_file_name)
-    dataframe.to_csv(output_path, index=False)
+def save_dataset(dataset: pd.DataFrame, output_dir: str, dataset_file_name: str, split: float) -> None:
+    num_groups = len(dataset)
+    num_test = int(num_groups * split)
+    test_indices = []
+
+    for scene, indices in dataset.groupby(['scene']).indices.items():
+        if len(test_indices) > num_test:
+            break
+        test_indices += list(indices)
+    train_indices = set(dataset.index) - set(test_indices)
+
+    dataset = dataset.drop('scene', axis=1)
+    dataset_test = dataset.loc[test_indices]
+    dataset_train = dataset.loc[train_indices]
+
+    dataset_test.to_csv(os.path.join(output_dir, 'test_' + dataset_file_name), index=False)
+    dataset_train.to_csv(os.path.join(output_dir, 'train_' + dataset_file_name), index=False)
 
 
 if __name__ == '__main__':
@@ -88,6 +105,10 @@ if __name__ == '__main__':
     parser.add_argument(
         '--frame-rate', '-fr', type=int, required=True,
         help='Frequency at which frames are sampled'
+    )
+    parser.add_argument(
+        '--split', '-s', type=float, required=True,
+        help='Training/test dataset split'
     )
 
     args = parser.parse_args()
