@@ -5,18 +5,18 @@
     "arch": {
         "type": "CycleSepConv",
         "args": {
-            "kernel_size": 51
+            "kernel_size": 31
         }
     },
     "data_loader": {
         "type": "DD40DataLoader",
         "args":{
-            "data_dir": "data/dataset/",
+            "data_dir": "data/dataset-simpsons/",
             "dataset_csv": "dataset.csv",
-            "batch_size": 1,
+            "batch_size": 6,
             "shuffle": true,
             "validation_split": 0.25,
-            "num_workers": 2
+            "num_workers": 4
         }
     },
     "optimizer": {
@@ -36,7 +36,7 @@
         }
     },
     "metrics": [
-        "ssim", "psnr"
+        "psnr"
     ],
     "lr_scheduler": {
         "type": "StepLR",

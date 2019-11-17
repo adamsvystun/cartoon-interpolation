@@ -113,7 +113,7 @@ class Trainer(BaseTrainer):
 
     def _show_images(self, input, target, output):
         b, c, w, h = input[0].shape
-        for i in range(self.config['data_loader']['args']['batch_size']):
+        for i in range(b):
             images = torch.cat([
                 torch.cat([input[0][i], input[1][i], input[2][i]], dim=0).view(3, c, w, h),
                 torch.cat([target[0][i], target[1][i], target[2][i]], dim=0).view(3, c, w, h),
