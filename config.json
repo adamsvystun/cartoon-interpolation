@@ -8,15 +8,28 @@
             "kernel_size": 31
         }
     },
-    "data_loader": {
+    "train_data_loader": {
         "type": "DD40DataLoader",
         "args":{
             "data_dir": "data/dataset-simpsons/",
-            "dataset_csv": "dataset.csv",
+            "dataset_csv": "train_dataset.csv",
             "batch_size": 6,
             "shuffle": true,
             "validation_split": 0.25,
             "num_workers": 4
+        }
+    },
+    "test_data_loader": {
+        "type": "DD40DataLoader",
+        "args":{
+            "data_dir": "data/dataset-simpsons/",
+            "dataset_csv": "test_dataset.csv",
+            "batch_size": 32,
+            "shuffle": false,
+            "validation_split": 0.0,
+            "num_workers": 4,
+            "training": false,
+            "return_paths": true
         }
     },
     "optimizer": {

@@ -16,16 +16,8 @@ from src.utils.parse_config import ConfigParser
 def main(config):
     logger = config.get_logger('test')
 
-    # setup data_loader instances
-    data_loader = getattr(module_data, config['data_loader']['type'])(
-        config['data_loader']['args']['data_dir'],
-        batch_size=512,
-        shuffle=False,
-        validation_split=0.0,
-        training=False,
-        return_paths=True,
-        num_workers=2
-    )
+    # setup data_loader instance
+    data_loader = config.init_obj('test_data_loader', module_data)
 
     # build model architecture
     model = config.init_obj('arch', module_arch)
