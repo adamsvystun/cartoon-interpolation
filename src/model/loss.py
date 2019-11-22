@@ -3,12 +3,12 @@ import torch.nn.functional as F
 from torchvision.models.vgg import vgg16
 
 
-vgg = vgg16(pretrained=True, progress=False)
-if torch.cuda.is_available():
-    vgg.cuda()
-new_classifier = torch.nn.Sequential(*list(vgg.classifier.children())[:-1])
-vgg.classifier = new_classifier
-print(vgg)
+#vgg = vgg16(pretrained=True, progress=False)
+#if torch.cuda.is_available():
+#    vgg.cuda()
+#new_classifier = torch.nn.Sequential(*list(vgg.classifier.children())[:-1])
+#vgg.classifier = new_classifier
+#print(vgg)
 
 def nll_loss(output, target):
     return F.nll_loss(output, target)
@@ -22,7 +22,7 @@ def perceptual_loss(predicted_image, true_image):
 
 def interpolation_loss(predicted_frame, true_frame, beta, gamma):
     loss =  beta * F.l1_loss(predicted_frame, true_frame)
-    loss += gamma * perceptual_loss(predicted_frame, true_frame)
+    #loss += gamma * perceptual_loss(predicted_frame, true_frame)
     return loss
 
 

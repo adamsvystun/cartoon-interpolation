@@ -80,8 +80,9 @@ class UpDouble(nn.Module):
 class Up(nn.Module):
     """Upscaling then double conv"""
 
-    def __init__(self, in_channels, out_channels, bilinear=True):
+    def __init__(self, in_channels, out_channels, bilinear=True, skip_connections=True):
         super().__init__()
+        self.skip_connections = skip_connections
 
         # if bilinear, use the normal convolutions to reduce the number of channels
         if bilinear:
@@ -91,7 +92,7 @@ class Up(nn.Module):
 
         self.conv = DoubleConv(in_channels, out_channels)
 
-    def forward(self, x1, skip1, skip2):
+    def forward(self, x1, skip1=None, skip2=None):
         """
         x2 and x3 should have the same size
 
@@ -101,15 +102,16 @@ class Up(nn.Module):
         :return:
         """
         x1 = self.up(x1)
-        # input is CHW
-        diff_y = skip1.size()[2] - x1.size()[2]
-        diff_x = skip1.size()[3] - x1.size()[3]
+        if self.skip_connections:
+            # input is CHW
+            diff_y = skip1.size()[2] - x1.size()[2]
+            diff_x = skip1.size()[3] - x1.size()[3]
 
-        x1 = F.pad(x1, [diff_x // 2, diff_x - diff_x // 2,
+            x1 = F.pad(x1, [diff_x // 2, diff_x - diff_x // 2,
                         diff_y // 2, diff_y - diff_y // 2])
 
-        x = torch.cat([skip1, x1, skip2], dim=1)
-        return self.conv(x)
+            x1 = torch.cat([skip1, x1, skip2], dim=1)
+        return self.conv(x1)
 
 
 class OutConv(nn.Module):

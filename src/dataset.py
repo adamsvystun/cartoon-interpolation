@@ -28,8 +28,8 @@ class DD40Dataset(data.Dataset):
         self.return_paths = return_paths
         self.directory = directory
         self.transform = transforms.Compose([
-            transforms.Grayscale(),
-            Tile(reps=(1, 1, 3)),
+  #          transforms.Grayscale(),
+   #         Tile(reps=(1, 1, 3)),
             transforms.Resize(size=(256, 256)),
             transforms.ToTensor(),
         ])

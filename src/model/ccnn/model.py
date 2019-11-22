@@ -6,7 +6,7 @@ from src.model.ccnn.layers import DoubleConv, Up, Down, OutConv, UpDouble
 
 
 class CCNN(nn.Module):
-    def __init__(self, n_channels=1, bilinear=True):
+    def __init__(self, n_channels=3, bilinear=True):
         super(CCNN, self).__init__()
         self.n_channels = n_channels
         self.bilinear = bilinear
@@ -16,10 +16,10 @@ class CCNN(nn.Module):
         self.down2 = Down(128, 256)
         self.down3 = Down(256, 512)
         self.down4 = Down(512, 512)
-        self.up1 = UpDouble(1024, 256, bilinear)
-        self.up2 = Up(512, 128, bilinear)
-        self.up3 = Up(256, 64, bilinear)
-        self.up4 = Up(128, 64, bilinear)
+        self.up1 = UpDouble(2048, 256, bilinear)
+        self.up2 = Up(768, 128, bilinear)
+        self.up3 = Up(384, 64, bilinear)
+        self.up4 = Up(64, 64, bilinear, skip_connections=False)
         self.out = OutConv(64, n_channels)
 
     def forward(self, frame1, frame2):
@@ -36,8 +36,8 @@ class CCNN(nn.Module):
         frame2_4 = self.down3(frame2_3)
         frame2_5 = self.down4(frame2_4)
         # Up
-        x = self.up1_double(frame1_5, frame2_5, frame1_4, frame2_4)
+        x = self.up1(frame1_5, frame2_5, frame1_4, frame2_4)
         x = self.up2(x, frame1_3, frame2_3)
         x = self.up3(x, frame1_2, frame2_2)
-        x = self.up4(x, frame1_1, frame2_1)
+        x = self.up4(x)
         return self.out(x)
