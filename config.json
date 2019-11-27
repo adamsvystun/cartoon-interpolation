@@ -40,11 +40,12 @@
         }
     },
     "loss": {
-        "type": "cycle_consistency_loss",
+        "type": "final_loss",
         "args": {
             "alphas": [1, 0.3, 1],
             "beta": 1,
-            "gamma": 1
+            "gamma": 1,
+            "theta": 0.1
         }
     },
     "metrics": [
