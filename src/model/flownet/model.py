@@ -9,6 +9,8 @@ import setproctitle
 sys.path.append('submodules/flownet2-pytorch')
 sys.path.append('../../../submodules/flownet2-pytorch')
 
+import cv2
+import cvbase as cvb
 import torch
 import torch.nn as nn
 
@@ -54,7 +56,8 @@ def _get_flow_net():
     parser.add_argument('--log_frequency', '--summ_iter', type=int, default=1, help="Log every n batches")
     parser.add_argument('--fp16', action='store_true', help='Run model in pseudo-fp16 mode (fp16 storage fp32 math).')
     parser.add_argument('-c', '--config', default=None, type=str, help='config file path (default: None)')
-
+    parser.add_argument('--image1', type=str, default='', help="Path to the first image")
+    parser.add_argument('--image2', type=str, default='', help="Path to the second image")
 
     tools.add_arguments_for_module(parser, models, argument_for_class='model', default='FlowNet2')
     tools.add_arguments_for_module(parser, losses, argument_for_class='loss', default='L1Loss')
@@ -152,3 +155,31 @@ def get_flow_net():
     if flow_net is None:
         flow_net = _get_flow_net()
     return flow_net
+
+
+def compute_flow():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--image1', type=str, default='', help="Path to the first image")
+    parser.add_argument('--image2', type=str, default='', help="Path to the second image")
+    args = parser.parse_args()
+
+    image1 = cv2.imread(args.image1)
+    image2 = cv2.imread(args.image2)
+
+    image1 = cv2.resize(image1, dsize=(512, 512))
+    image2 = cv2.resize(image2, dsize=(512, 512))
+
+    image1 = torch.from_numpy(image1).float()
+    image2 = torch.from_numpy(image2).float()
+
+    images = torch.cat([image1[None], image2[None]])
+    images = images[None]
+    images = images.permute(0, 4, 1, 2, 3)
+
+    flow_net = get_flow_net()
+    flow = flow_net(images)
+    cvb.show_flow(flow[0].permute(1, 2, 0).cpu().detach().numpy())
+
+
+if __name__ == '__main__':
+    compute_flow()

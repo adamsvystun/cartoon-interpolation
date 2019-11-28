@@ -1,6 +1,6 @@
-torch
 Augmentor
 cupy
+cvbase
 moviepy==1.0.0
 numpy
 opencv-python
@@ -12,4 +12,5 @@ setproctitle
 tensorboard>=1.14.0
 tensorboardx
 tqdm
+torch
 torchvision
