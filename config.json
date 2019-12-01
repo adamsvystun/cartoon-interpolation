@@ -3,7 +3,7 @@
     "n_gpu": 1,
 
     "arch": {
-        "type": "CycleCCNN",
+        "type": "FlowCycleCCNN",
         "args": {}
     },
     "pretrain_data_loader": {
