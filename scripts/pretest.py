@@ -77,6 +77,7 @@ def main(config):
         })
         logger.info(log)
 
+
 if __name__ == '__main__':
     args = argparse.ArgumentParser(description='Cartoon interpolation test')
     args.add_argument('-c', '--config', default=None, type=str,
