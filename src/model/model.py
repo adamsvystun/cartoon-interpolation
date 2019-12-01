@@ -12,6 +12,10 @@ class CycleCCNN(torch.nn.Module):
         super(CycleCCNN, self).__init__()
         self.backbone = CCNN()
 
+    def forward_single(self, frame0, frame2):
+        frame1_pred = self.backbone(frame0, frame2)
+        return frame1_pred
+
     def forward(self, frame0, frame2, frame4):
         frame1_pred = self.backbone(frame0, frame2)
         frame3_pred = self.backbone(frame2, frame4)
