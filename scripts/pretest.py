@@ -49,7 +49,7 @@ def main(config):
     with torch.no_grad():
         for batch_idx, batch_sample in enumerate(data_loader):
             for k, v in batch_sample.items():
-                if not '_path' in k:
+                if '_path' not in k:
                     batch_sample[k] = v.to(device)
             output = model.forward_single(batch_sample['frame0'], batch_sample['frame2'])
             target = batch_sample['frame1']
