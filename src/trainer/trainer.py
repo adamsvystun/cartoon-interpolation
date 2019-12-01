@@ -45,7 +45,7 @@ class Trainer(BaseTrainer):
             input = (batch_sample['frame0'], batch_sample['frame2'], batch_sample['frame4'])
             output = self.model(*input)
             target = (batch_sample['frame1'], batch_sample['frame2'], batch_sample['frame3'])
-            loss = self.criterion(input, output, target, **self.config['loss']['args'])
+            loss = self.criterion(output, target, **self.config['loss']['args'])
             loss.backward()
             self.optimizer.step()
 
@@ -88,7 +88,7 @@ class Trainer(BaseTrainer):
                 input = (batch_sample['frame0'], batch_sample['frame2'], batch_sample['frame4'])
                 output = self.model(*input)
                 target = (batch_sample['frame1'], batch_sample['frame2'], batch_sample['frame3'])
-                loss = self.criterion(input, output, target, **self.config['loss']['args'])
+                loss = self.criterion(output, target, **self.config['loss']['args'])
 
                 self.writer.set_step((epoch - 1) * len(self.valid_data_loader) + batch_idx, 'valid')
                 self.valid_metrics.update('loss', loss.item())
