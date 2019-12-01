@@ -4,15 +4,14 @@
 
     "arch": {
         "type": "CycleCCNN",
-        "args": {
-        }
+        "args": {}
     },
     "pretrain_data_loader": {
-        "type": "DD40DataLoader",
+        "type": "PretrainDataLoader",
         "args":{
-            "data_dir": "data/dataset-simpsons-v1-1/",
+            "data_dir": "data/dataset-simpsons-movie/",
             "dataset_csv": "train_dataset.csv",
-            "batch_size": 4,
+            "batch_size": 6,
             "shuffle": true,
             "validation_split": 0.25,
             "num_workers": 4
