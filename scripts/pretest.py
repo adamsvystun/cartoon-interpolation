@@ -62,6 +62,7 @@ def main(config):
             for i in range(batch_size):
                 frame1 = frames1[i].astype(np.float32)
                 frame1_path = batch_sample['frame1_path'][i]
+                print(frame1.shape, frame1_path)
                 Image.fromarray(frame1).save(os.path.join(save_folder, frame1_path))
 
                 # computing loss, metrics on test set
