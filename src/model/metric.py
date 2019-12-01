@@ -40,5 +40,5 @@ def ssim(outputs, targets):
         with torch.no_grad():
             original = target.cpu().detach().numpy()
             compared = output.cpu().detach().numpy()
-            value += structural_similarity(original, compared)
+            value += structural_similarity(original, compared, multichannel=True)
     return value / len(outputs)
