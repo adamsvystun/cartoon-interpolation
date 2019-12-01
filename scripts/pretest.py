@@ -64,7 +64,7 @@ def main(config):
                 frame1 = np.moveaxis(frame1, 0, 2)
                 frame1_path = batch_sample['frame1_path'][i]
                 print(frame1.shape, frame1.max(), frame1.min())
-                Image.fromarray(frame1).save(os.path.join(save_folder, frame1_path))
+                # Image.fromarray(frame1).save(os.path.join(save_folder, frame1_path))
 
                 # computing loss, metrics on test set
                 loss = loss_fn(output, target)
