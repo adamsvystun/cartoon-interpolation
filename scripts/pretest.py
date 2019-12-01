@@ -46,6 +46,8 @@ def main(config):
     run_id = datetime.now().strftime(r'%m%d_%H%M%S')
     save_folder = os.path.join(config['trainer']['save_dir'], 'test', exper_name, run_id)
 
+    os.makedirs(save_folder)
+
     with torch.no_grad():
         for batch_idx, batch_sample in enumerate(data_loader):
             for k, v in batch_sample.items():
