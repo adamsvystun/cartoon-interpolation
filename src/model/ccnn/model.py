@@ -19,7 +19,7 @@ class CCNN(nn.Module):
         self.up1 = UpDouble(2048, 256, bilinear)
         self.up2 = Up(768, 128, bilinear)
         self.up3 = Up(384, 64, bilinear)
-        self.up4 = Up(64, 64, bilinear, skip_connections=False)
+        self.up4 = Up(128, 64, bilinear)
         self.out = OutConv(64, n_channels)
 
     def forward(self, frame1, frame2):
@@ -39,5 +39,5 @@ class CCNN(nn.Module):
         x = self.up1(frame1_5, frame2_5, frame1_4, frame2_4)
         x = self.up2(x, frame1_3, frame2_3)
         x = self.up3(x, frame1_2, frame2_2)
-        x = self.up4(x)
+        x = self.up4(x, frame1_1, frame2_1)
         return self.out(x)

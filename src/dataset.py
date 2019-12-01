@@ -31,7 +31,7 @@ class DD40Dataset(data.Dataset):
         self.transform = transforms.Compose([
   #          transforms.Grayscale(),
    #         Tile(reps=(1, 1, 3)),
-            transforms.Resize(size=(256, 256)),
+            transforms.Resize(size=(196, 196)),
             transforms.ToTensor(),
         ])
         self.dataset_descriptor = pd.read_csv(os.path.join(directory, dataset_file))
@@ -62,7 +62,7 @@ class PretrainDataset(data.Dataset):
         self.return_paths = return_paths
         self.directory = directory
         self.transform = transforms.Compose([
-            transforms.Resize(size=(256, 256)),
+            transforms.Resize(size=(196, 196)),
             transforms.ToTensor(),
         ])
         self.dataset_descriptor = pd.read_csv(os.path.join(directory, dataset_file))

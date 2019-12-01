@@ -9,7 +9,7 @@
     "pretrain_data_loader": {
         "type": "PretrainDataLoader",
         "args":{
-            "data_dir": "data/dataset-simpsons-movie/",
+            "data_dir": "data/dataset-akira-v2/",
             "dataset_csv": "train_dataset.csv",
             "batch_size": 6,
             "shuffle": true,
