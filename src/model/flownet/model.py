@@ -59,6 +59,7 @@ def _get_flow_net():
     parser.add_argument('--image1', type=str, default='', help="Path to the first image")
     parser.add_argument('--image2', type=str, default='', help="Path to the second image")
 
+    parser.add_argument('-r', '--resume-old', type=str)
     tools.add_arguments_for_module(parser, models, argument_for_class='model', default='FlowNet2')
     tools.add_arguments_for_module(parser, losses, argument_for_class='loss', default='L1Loss')
     tools.add_arguments_for_module(parser, torch.optim, argument_for_class='optimizer', default='Adam',

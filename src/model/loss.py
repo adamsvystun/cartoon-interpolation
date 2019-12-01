@@ -7,12 +7,17 @@ from torchvision.models.vgg import vgg16
 from src.model.flownet.model import get_flow_net
 
 
-#vgg = vgg16(pretrained=True, progress=False)
-#if torch.cuda.is_available():
-#    vgg.cuda()
-#new_classifier = torch.nn.Sequential(*list(vgg.classifier.children())[:-1])
-#vgg.classifier = new_classifier
-#print(vgg)
+vgg = None
+def get_vgg():
+    global vgg
+    if vgg is None:
+        vgg = vgg16(pretrained=True, progress=False)
+        if torch.cuda.is_available():
+            vgg.cuda()
+        new_classifier = torch.nn.Sequential(*list(vgg.classifier.children())[:-1])
+        vgg.classifier = new_classifier
+        print(vgg)
+    return vgg
 
 
 def nll_loss(output, target):
@@ -24,6 +29,7 @@ def l1_loss(output, target):
 
 
 def perceptual_loss(predicted_image, true_image):
+    vgg = get_vgg()
     features_y = vgg(predicted_image)
     features_x = vgg(true_image)
     return F.mse_loss(features_y, features_x)
@@ -31,7 +37,7 @@ def perceptual_loss(predicted_image, true_image):
 
 def interpolation_loss(predicted_frame, true_frame, beta, gamma):
     loss =  beta * F.l1_loss(predicted_frame, true_frame)
-    #loss += gamma * perceptual_loss(predicted_frame, true_frame)
+    loss += gamma * perceptual_loss(predicted_frame, true_frame)
     return loss
 
 
