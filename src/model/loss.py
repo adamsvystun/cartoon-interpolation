@@ -37,7 +37,8 @@ def perceptual_loss(predicted_image, true_image):
 
 def interpolation_loss(predicted_frame, true_frame, beta, gamma):
     loss =  beta * F.l1_loss(predicted_frame, true_frame)
-    loss += gamma * perceptual_loss(predicted_frame, true_frame)
+    if gamma != 0:
+        loss += gamma * perceptual_loss(predicted_frame, true_frame)
     return loss
 
 

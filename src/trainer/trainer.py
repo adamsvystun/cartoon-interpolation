@@ -119,4 +119,4 @@ class Trainer(BaseTrainer):
                 torch.cat([target[0][i], target[1][i], target[2][i]], dim=0).view(3, c, w, h),
                 torch.cat([output[0][i], output[1][i], output[2][i]], dim=0).view(3, c, w, h),
             ], dim=0)
-            self.writer.add_image(f'example_{i}', make_grid(images.cpu(), nrow=3, normalize=True))
+            self.writer.add_image(f'example_{i}', make_grid(images.cpu(), nrow=3, normalize=False))
