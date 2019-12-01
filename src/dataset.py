@@ -95,8 +95,8 @@ class PretrainDataset(data.Dataset):
         return self._translate(image)
 
     def _zoom(self, image):
-        min_bound = 0.05
-        max_bound = 0.1
+        min_bound = 0.01
+        max_bound = 0.05
 
         lf_factor = random.uniform(min_bound, max_bound)
         rt_factor = random.uniform(1.0 - max_bound, 1.0 - min_bound)
@@ -119,8 +119,8 @@ class PretrainDataset(data.Dataset):
     def _translate(self, image):
         w, h = image.size
         direction = np.random.choice(['vertical', 'horizontal'])
-        crop_size = random.uniform(0.6, 0.9)
-        translation = random.uniform(0.05, (1 - crop_size) / 2)
+        crop_size = random.uniform(0.7, 0.9)
+        translation = random.uniform(0.03, (1 - crop_size) / 2)
 
         frames = []
         for i in range(3):

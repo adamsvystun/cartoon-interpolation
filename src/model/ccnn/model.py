@@ -64,7 +64,7 @@ class DoubleStreamedCCNN(nn.Module):
         self.up1 = UpDouble(2048, 256, bilinear)
         self.up2 = Up(768, 128, bilinear)
         self.up3 = Up(384, 64, bilinear)
-        self.up4 = Up(128, 64, bilinear)
+        self.up4 = Up(192, 64, bilinear)
         self.out = OutConv(64, self.n_channels)
 
     def forward(self, frame1, frame2):
