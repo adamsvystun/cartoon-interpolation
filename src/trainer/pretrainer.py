@@ -10,6 +10,7 @@ class PreTrainer(BaseTrainer):
     """
     PreTrainer class
     """
+
     def __init__(self, model, criterion, metric_ftns, optimizer, config, data_loader,
                  valid_data_loader=None, lr_scheduler=None, len_epoch=None):
         super().__init__(model, criterion, metric_ftns, optimizer, config)
@@ -39,7 +40,7 @@ class PreTrainer(BaseTrainer):
         self.model.train()
         self.train_metrics.reset()
         for batch_idx, batch_sample in enumerate(self.data_loader):
-            batch_sample = {k: v.to(self.device) for k,v in batch_sample.items()}
+            batch_sample = {k: v.to(self.device) for k, v in batch_sample.items()}
 
             self.optimizer.zero_grad()
             input = (batch_sample['frame0'], batch_sample['frame2'])
@@ -59,7 +60,7 @@ class PreTrainer(BaseTrainer):
                     epoch,
                     self._progress(batch_idx),
                     loss.item()))
-                # self._show_images(input, target, output)
+                self._show_images(input, target, output)
 
             if batch_idx == self.len_epoch:
                 break
@@ -67,7 +68,7 @@ class PreTrainer(BaseTrainer):
 
         if self.do_validation:
             val_log = self._valid_epoch(epoch)
-            log.update(**{'val_'+k : v for k, v in val_log.items()})
+            log.update(**{'val_' + k: v for k, v in val_log.items()})
 
         if self.lr_scheduler is not None:
             self.lr_scheduler.step()
@@ -83,7 +84,7 @@ class PreTrainer(BaseTrainer):
         self.valid_metrics.reset()
         with torch.no_grad():
             for batch_idx, batch_sample in enumerate(self.valid_data_loader):
-                batch_sample = {k: v.to(self.device) for k,v in batch_sample.items()}
+                batch_sample = {k: v.to(self.device) for k, v in batch_sample.items()}
 
                 input = (batch_sample['frame0'], batch_sample['frame2'])
                 output = self.model.forward_single(*input)
@@ -94,7 +95,7 @@ class PreTrainer(BaseTrainer):
                 self.valid_metrics.update('loss', loss.item())
                 for met in self.metric_ftns:
                     self.valid_metrics.update(met.__name__, met(output, target))
-                # self._show_images(input, target, output)
+                self._show_images(input, target, output)
 
         # add histogram of model parameters to the tensorboard
         for name, p in self.model.named_parameters():
@@ -115,8 +116,7 @@ class PreTrainer(BaseTrainer):
         b, c, w, h = input[0].shape
         for i in range(b):
             images = torch.cat([
-                torch.cat([input[0][i], input[1][i], input[2][i]], dim=0).view(3, c, w, h),
-                torch.cat([target[0][i], target[1][i], target[2][i]], dim=0).view(3, c, w, h),
-                torch.cat([output[0][i], output[1][i], output[2][i]], dim=0).view(3, c, w, h),
+                torch.cat([input[0][i], input[1][i]], dim=0).view(2, c, w, h),
+                torch.cat([target[i], output[i]], dim=0).view(2, c, w, h)
             ], dim=0)
-            self.writer.add_image(f'example_{i}', make_grid(images.cpu(), nrow=3, normalize=True))
+            self.writer.add_image(f'example_{i}', make_grid(images.cpu(), nrow=1, normalize=True))
