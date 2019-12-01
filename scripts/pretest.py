@@ -48,7 +48,9 @@ def main(config):
 
     with torch.no_grad():
         for batch_idx, batch_sample in enumerate(data_loader):
-            batch_sample = {k: v.to(device) for k, v in batch_sample.items()}
+            for k, v in batch_sample.items():
+                if not '_path' in k:
+                    batch_sample[k] = v.to(device)
             output = model.forward_single(batch_sample['frame0'], batch_sample['frame2'])
             target = batch_sample['frame1']
             batch_size = batch_sample['frame0'].shape[0]
