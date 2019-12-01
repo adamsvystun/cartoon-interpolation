@@ -26,7 +26,6 @@ class CycleCCNN(torch.nn.Module):
         return self.backbone(frame0, frame2)
 
 
-
 class CycleSepConv(torch.nn.Module):
 
     def __init__(self, kernel_size):

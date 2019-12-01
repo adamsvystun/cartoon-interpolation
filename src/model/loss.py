@@ -19,6 +19,10 @@ def nll_loss(output, target):
     return F.nll_loss(output, target)
 
 
+def l1_loss(output, target):
+    return F.l1_loss(output, target)
+
+
 def perceptual_loss(predicted_image, true_image):
     features_y = vgg(predicted_image)
     features_x = vgg(true_image)
