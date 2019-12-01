@@ -107,12 +107,10 @@ class PretrainDataset(data.Dataset):
         for i in range(2):
             frame = frames[i]
             w, h = frame.size
-
             lf = lf_factor * w
             rt = rt_factor * w
             tp = tp_factor * h
             bt = bt_factor * h
-
             new_frame = self._crop_resize(frame, lf, rt, tp, bt)
             frames.append(new_frame)
 
@@ -150,3 +148,5 @@ class PretrainDataset(data.Dataset):
         image = image.crop((lf, tp, rt, bt))
         image = image.resize((w, h))
         return image
+
+

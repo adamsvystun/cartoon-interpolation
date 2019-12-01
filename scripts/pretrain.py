@@ -8,7 +8,7 @@ import src.model.loss as module_loss
 import src.model.metric as module_metric
 import src.model.model as module_arch
 from src.utils.parse_config import ConfigParser
-from src.trainer.pretrainer import Trainer
+from src.trainer.pretrainer import PreTrainer
 
 
 # fix random seeds for reproducibility
@@ -40,11 +40,11 @@ def main(config):
 
     lr_scheduler = config.init_obj('lr_scheduler', torch.optim.lr_scheduler, optimizer)
 
-    trainer = Trainer(model, criterion, metrics, optimizer,
-                      config=config,
-                      data_loader=data_loader,
-                      valid_data_loader=valid_data_loader,
-                      lr_scheduler=lr_scheduler)
+    trainer = PreTrainer(model, criterion, metrics, optimizer,
+                        config=config,
+                        data_loader=data_loader,
+                        valid_data_loader=valid_data_loader,
+                        lr_scheduler=lr_scheduler)
 
     trainer.train()
 
