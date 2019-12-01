@@ -44,7 +44,7 @@ class CCNN(nn.Module):
 
 class DoubleStreamedCCNN(nn.Module):
     def __init__(self, n_channels=3, bilinear=True):
-        super(CCNN, self).__init__()
+        super(DoubleStreamedCCNN, self).__init__()
         self.n_channels = n_channels
         self.bilinear = bilinear
 
