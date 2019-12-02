@@ -86,9 +86,10 @@ def main(config):
                 loss = loss_fn(output, target, **config['loss']['args'])
                 total_loss += loss.item()
                 for i, metric in enumerate(metric_fns):
-                    total_metrics[i] += metric(output, target)
+                    total_metrics[i] += metric(output[0], target[0])
+                    total_metrics[i] += metric(output[2], target[2])
 
-        n_samples = len(data_loader.sampler)
+        n_samples = len(data_loader.sampler) * 2
         log = {'loss': total_loss / n_samples}
         log.update({
             met.__name__: total_metrics[i].item() / n_samples for i, met in enumerate(metric_fns)
