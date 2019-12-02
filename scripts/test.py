@@ -83,7 +83,7 @@ def main(config):
                 save_frame(true_frames4[i], os.path.join(save_folder, batch_sample['frame4_path'][i]))
 
                 # computing loss, metrics on test set
-                loss = loss_fn(output, target)
+                loss = loss_fn(output, target, **config['loss']['args'])
                 total_loss += loss.item()
                 for i, metric in enumerate(metric_fns):
                     total_metrics[i] += metric(output, target)
