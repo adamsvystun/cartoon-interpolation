@@ -13,6 +13,13 @@ import src.model.model as module_arch
 from src.utils.parse_config import ConfigParser
 
 
+def save_frame(frame, path):
+    frame = frame.astype(np.float32)
+    frame = np.moveaxis(frame, 0, 2)
+    frame = (np.clip(frame, 0, 1) * 255).astype(np.uint8)
+    Image.fromarray(frame).save(path)
+
+
 def main(config):
     logger = config.get_logger('test')
 
@@ -24,7 +31,7 @@ def main(config):
     logger.info(model)
 
     # get function handles of loss and metrics
-    loss_fn = getattr(module_loss, config['loss'])
+    loss_fn = getattr(module_loss, config['loss']['type'])
     metric_fns = [getattr(module_metric, met) for met in config['metrics']]
 
     logger.info('Loading checkpoint: {} ...'.format(config.resume))
@@ -46,29 +53,40 @@ def main(config):
     run_id = datetime.now().strftime(r'%m%d_%H%M%S')
     save_folder = os.path.join(config['trainer']['save_dir'], 'test', exper_name, run_id)
 
+    os.makedirs(save_folder)
+
     with torch.no_grad():
         for batch_idx, batch_sample in enumerate(data_loader):
-            batch_sample = {k: v.to(device) for k, v in batch_sample.items()}
+            for k, v in batch_sample.items():
+                if '_path' not in k:
+                    batch_sample[k] = v.to(device)
+
             output = model(batch_sample['frame0'], batch_sample['frame2'], batch_sample['frame4'])
             target = (batch_sample['frame1'], batch_sample['frame2'], batch_sample['frame3'])
             batch_size = batch_sample['frame0'].shape[0]
 
             frames1 = output[0].cpu().detach().numpy()
             frames3 = output[2].cpu().detach().numpy()
+            true_frames0 = batch_sample['frame0'].cpu().detach().numpy()
+            true_frames1 = batch_sample['frame1'].cpu().detach().numpy()
+            true_frames2 = batch_sample['frame2'].cpu().detach().numpy()
+            true_frames3 = batch_sample['frame3'].cpu().detach().numpy()
+            true_frames4 = batch_sample['frame4'].cpu().detach().numpy()
 
             for i in range(batch_size):
-                frame1 = frames1[i].astype(np.float32)
-                frame3 = frames3[i].astype(np.float32)
-                frame1_path = batch_sample['frame1_path'][i]
-                frame3_path = batch_sample['frame1_path'][i]
-                Image.fromarray(frame1).save(os.path.join(save_folder, frame1_path))
-                Image.fromarray(frame3).save(os.path.join(save_folder, frame3_path))
+                save_frame(frames1[i], os.path.join(save_folder, batch_sample['frame1_path'][i] + '.pred.png'))
+                save_frame(frames3[i], os.path.join(save_folder, batch_sample['frame3_path'][i] + '.pred.png'))
+                save_frame(true_frames0[i], os.path.join(save_folder, batch_sample['frame0_path'][i]))
+                save_frame(true_frames1[i], os.path.join(save_folder, batch_sample['frame1_path'][i]))
+                save_frame(true_frames2[i], os.path.join(save_folder, batch_sample['frame2_path'][i]))
+                save_frame(true_frames3[i], os.path.join(save_folder, batch_sample['frame3_path'][i]))
+                save_frame(true_frames4[i], os.path.join(save_folder, batch_sample['frame4_path'][i]))
 
                 # computing loss, metrics on test set
                 loss = loss_fn(output, target)
-                total_loss += loss.item() * batch_size
+                total_loss += loss.item()
                 for i, metric in enumerate(metric_fns):
-                    total_metrics[i] += metric(output, target) * batch_size
+                    total_metrics[i] += metric(output, target)
 
         n_samples = len(data_loader.sampler)
         log = {'loss': total_loss / n_samples}
