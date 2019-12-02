@@ -71,7 +71,7 @@ def main(config):
                 true_frame1 = np.moveaxis(true_frame1, 0, 2)
                 true_frame2 = np.moveaxis(true_frame2, 0, 2)
                 true_frame3 = np.moveaxis(true_frame3, 0, 2)
-                frame1 = np.clip(frame1, 0, 1)
+                frame1 = (np.clip(frame1, 0, 1) * 255).astype(np.uint8)
                 true_frame1 = (np.clip(true_frame1, 0, 1) * 255).astype(np.uint8)
                 true_frame2 = (np.clip(true_frame2, 0, 1) * 255).astype(np.uint8)
                 true_frame3 = (np.clip(true_frame3, 0, 1) * 255).astype(np.uint8)
