@@ -75,9 +75,9 @@ def main(config):
                 true_frame1 = np.clip(true_frame1, 0, 1)
                 true_frame2 = np.clip(true_frame2, 0, 1)
                 true_frame3 = np.clip(true_frame3, 0, 1)
-                frame1_path = batch_sample['frame1_path'][i]
-                frame2_path = batch_sample['frame2_path'][i]
-                frame3_path = batch_sample['frame3_path'][i]
+                frame1_path = batch_sample['frame0_path'][i]
+                frame2_path = batch_sample['frame1_path'][i]
+                frame3_path = batch_sample['frame2_path'][i]
                 Image.fromarray(true_frame1).save(os.path.join(save_folder, frame1_path))
                 Image.fromarray(true_frame2).save(os.path.join(save_folder, frame2_path))
                 Image.fromarray(true_frame3).save(os.path.join(save_folder, frame3_path))
