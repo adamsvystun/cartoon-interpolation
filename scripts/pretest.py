@@ -72,9 +72,9 @@ def main(config):
                 true_frame2 = np.moveaxis(true_frame2, 0, 2)
                 true_frame3 = np.moveaxis(true_frame3, 0, 2)
                 frame1 = np.clip(frame1, 0, 1)
-                true_frame1 = np.clip(true_frame1, 0, 1)
-                true_frame2 = np.clip(true_frame2, 0, 1)
-                true_frame3 = np.clip(true_frame3, 0, 1)
+                true_frame1 = (np.clip(true_frame1, 0, 1) * 255).astype(np.uint8)
+                true_frame2 = (np.clip(true_frame2, 0, 1) * 255).astype(np.uint8)
+                true_frame3 = (np.clip(true_frame3, 0, 1) * 255).astype(np.uint8)
                 frame1_path = batch_sample['frame0_path'][i]
                 frame2_path = batch_sample['frame1_path'][i]
                 frame3_path = batch_sample['frame2_path'][i]
