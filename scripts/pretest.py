@@ -58,14 +58,30 @@ def main(config):
             batch_size = batch_sample['frame0'].shape[0]
 
             frames1 = output.cpu().detach().numpy()
+            true_frames1 = batch_sample['frame0'].cpu().detach().numpy()
+            true_frames2 = batch_sample['frame1'].cpu().detach().numpy()
+            true_frames3 = batch_sample['frame2'].cpu().detach().numpy()
 
             for i in range(batch_size):
                 frame1 = frames1[i].astype(np.float32)
+                true_frame1 = true_frames1[i].astype(np.float32)
+                true_frame2 = true_frames2[i].astype(np.float32)
+                true_frame3 = true_frames3[i].astype(np.float32)
                 frame1 = np.moveaxis(frame1, 0, 2)
+                true_frame1 = np.moveaxis(true_frame1, 0, 2)
+                true_frame2 = np.moveaxis(true_frame2, 0, 2)
+                true_frame3 = np.moveaxis(true_frame3, 0, 2)
                 frame1 = np.clip(frame1, 0, 1)
+                true_frame1 = np.clip(true_frame1, 0, 1)
+                true_frame2 = np.clip(true_frame2, 0, 1)
+                true_frame3 = np.clip(true_frame3, 0, 1)
                 frame1_path = batch_sample['frame1_path'][i]
-                print(frame1.shape, frame1.max(), frame1.min())
-                # Image.fromarray(frame1).save(os.path.join(save_folder, frame1_path))
+                frame2_path = batch_sample['frame2_path'][i]
+                frame3_path = batch_sample['frame3_path'][i]
+                Image.fromarray(true_frame1).save(os.path.join(save_folder, frame1_path))
+                Image.fromarray(true_frame2).save(os.path.join(save_folder, frame2_path))
+                Image.fromarray(true_frame3).save(os.path.join(save_folder, frame3_path))
+                Image.fromarray(frame1).save(os.path.join(save_folder, frame1_path + 'pred.png'))
 
                 # computing loss, metrics on test set
                 loss = loss_fn(output, target)
