@@ -57,8 +57,14 @@ class DD40Dataset(data.Dataset):
 
 class PretrainDataset(data.Dataset):
 
-    def __init__(self, directory, dataset_file, train, return_paths=False):
+    def __init__(self, directory, dataset_file, train, min_zoom, max_zoom,
+                 min_crop_size, max_crop_size, min_translation, return_paths=False):
         self.train = train
+        self.min_zoom = min_zoom
+        self.max_zoom = max_zoom
+        self.min_crop_size = min_crop_size
+        self.max_crop_size = max_crop_size
+        self.min_translation = min_translation
         self.return_paths = return_paths
         self.directory = directory
         self.transform = transforms.Compose([
@@ -95,13 +101,10 @@ class PretrainDataset(data.Dataset):
         return self._translate(image)
 
     def _zoom(self, image):
-        min_bound = 0.01
-        max_bound = 0.05
-
-        lf_factor = random.uniform(min_bound, max_bound)
-        rt_factor = random.uniform(1.0 - max_bound, 1.0 - min_bound)
-        tp_factor = random.uniform(min_bound, max_bound)
-        bt_factor = random.uniform(1.0 - max_bound, 1.0 - min_bound)
+        lf_factor = random.uniform(self.min_zoom, self.max_zoom)
+        rt_factor = random.uniform(1.0 - self.max_zoom, 1.0 - self.min_zoom)
+        tp_factor = random.uniform(self.min_zoom, self.max_zoom)
+        bt_factor = random.uniform(1.0 - self.max_zoom, 1.0 - self.min_zoom)
 
         frames = [image]
         for i in range(2):
@@ -119,8 +122,8 @@ class PretrainDataset(data.Dataset):
     def _translate(self, image):
         w, h = image.size
         direction = np.random.choice(['vertical', 'horizontal'])
-        crop_size = random.uniform(0.7, 0.9)
-        translation = random.uniform(0.03, (1 - crop_size) / 2)
+        crop_size = random.uniform(self.min_crop_size, self.max_crop_size)
+        translation = random.uniform(self.min_translation, (1 - crop_size) / 2)
 
         frames = []
         for i in range(3):
@@ -148,5 +151,3 @@ class PretrainDataset(data.Dataset):
         image = image.crop((lf, tp, rt, bt))
         image = image.resize((w, h))
         return image
-
-
