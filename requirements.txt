@@ -7,7 +7,7 @@ opencv-python
 pandas
 Pillow
 scikit-image
-scipy==1.1.0
+scipy==1.10.0
 setproctitle
 tensorboard>=1.14.0
 tensorboardx
